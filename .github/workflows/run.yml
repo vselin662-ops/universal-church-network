@@ -5,7 +5,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Set up Python
+      - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
@@ -13,8 +13,9 @@ jobs:
         run: pip install requests
       - name: Run Crawler
         run: python crawler/collect_data.py
-      - name: Save Result
+      - name: Upload result
         uses: actions/upload-artifact@v4
         with:
-          name: church-database-file
-          path: "**/*.json" # Робот сам найдет файл в любой папке
+          name: church-base
+          # Этот путь заставит робота обыскать ВСЕ папки на наличие JSON
+          path: "**/*.json" 
