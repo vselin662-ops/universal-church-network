@@ -1,20 +1,40 @@
-name: Collect Churches
-on: [workflow_dispatch]
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Setup Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.9'
-      - name: Install Dependencies
-        run: pip install requests
-      - name: Run Crawler
-        run: python crawler/collect_data.py
-      - name: Upload result
-        uses: actions/upload-artifact@v4
-        with:
-          name: church-base
-          path: "**/*.json" # Робот сам найдет любой JSON файл в любой папке
+import requests
+import json
+import os
+
+def get_churches(country="Russia"):
+    print(f"Начинаю сбор данных по стране: {country}...")
+    overpass_url = "https://overpass-api.de"
+    query = f"""
+    [out:json][timeout:90];
+    area["name"="{country}"]->.searchArea;
+    (
+      node["amenity"="place_of_worship"]["religion"="christian"](area.searchArea);
+      way["amenity"="place_of_worship"]["religion"="christian"](area.searchArea);
+    );
+    out center;
+    """
+    try:
+        response = requests.post(overpass_url, data={'data': query})
+        data = response.json()
+        results = []
+        for element in data.get('elements', []):
+            tags = element.get('tags', {})
+            results.append({
+                'name': tags.get('name', 'N/A'),
+                'city': tags.get('addr:city', 'N/A'),
+                'website': tags.get('website', 'N/A'),
+                'lat': element.get('lat', element.get('center', {}).get('lat')),
+                'lon': element.get('lon', element.get('center', {}).get('center', {}).get('lon', 0))
+            })
+        
+        # Сохраняем файл прямо в корень для надежности
+        filename = "churches_result.json"
+        with open(filename, "w", encoding="utf-8") as f:
+            json.dump(results, f, ensure_ascii=False, indent=4)
+        print(f"Успех! Собрано {len(results)} объектов. Файл: {os.path.abspath(filename)}")
+    except Exception as e:
+        print(f"Ошибка: {e}")
+
+if __name__ == "__main__":
+    get_churches("Russia")
