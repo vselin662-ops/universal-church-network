@@ -8,6 +8,8 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }} # Секретный ключ доступа
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
@@ -19,7 +21,7 @@ jobs:
       - name: Auto-Commit Changes
         run: |
           git config --global user.name "github-actions[bot]"
-          git config --global user.email "41898282+github-actions[bot]@://github.com"
+          git config --global user.email "github-actions[bot]@://github.com"
           git add database/*.json
-          git commit -m "chore: auto-update church database [skip ci]" || echo "No changes"
+          git commit -m "chore: update churches database" || echo "No changes"
           git push origin main
