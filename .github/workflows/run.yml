@@ -5,16 +5,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Setup Python
+      - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.10'
       - name: Install Libs
         run: pip install requests
-      - name: Run
+      - name: Run Crawler
         run: python crawler/collect_data.py
-      - name: Save
+      - name: Save Result
         uses: actions/upload-artifact@v4
         with:
           name: church-database-file
-          path: "*.json"
+          path: "**/*.json" # Робот сам найдет файл в любой папке
