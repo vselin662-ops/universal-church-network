@@ -1,0 +1,28 @@
+name: 🌍 Global Church Sync
+on:
+  workflow_dispatch: # Запуск кнопкой
+  schedule:
+    - cron: '0 0 1 * *' # Авто-обновление раз в месяц
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # Разрешаем роботу записывать файлы в твой проект
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - name: Install Libs
+        run: pip install requests
+      - name: Run Scraper
+        run: python scripts/collect_world.py
+      - name: Auto-Commit Changes
+        run: |
+          git config --global user.name "UCN-Data-Bot"
+          git config --global user.email "bot@ucn.org"
+          git add database/*.json
+          git commit -m "chore: auto-update church database [skip ci]" || echo "No changes"
+          git push
