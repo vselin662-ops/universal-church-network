@@ -1,16 +1,20 @@
 name: Global Collector
 on: [workflow_dispatch]
+permissions:
+  contents: write # Даем роботу право записывать файлы в проект
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Run
+      - name: Setup
+        run: pip install requests
+      - name: Run Crawler
+        run: python crawler/collect_data.py
+      - name: Save to Repo
         run: |
-          pip install requests
-          python crawler/collect_data.py
-      - name: Save
-        uses: actions/upload-artifact@v4
-        with:
-          name: church-database
-          path: "**/*.json"
+          git config --global user.name 'github-actions'
+          git config --global user.email 'github-actions@github.com'
+          git add *.json
+          git commit -m "Автоматическое обновление базы церквей" || echo "Нет изменений"
+          git push
