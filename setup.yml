@@ -1,0 +1,16 @@
+name: Global Collector
+on: [workflow_dispatch]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run
+        run: |
+          pip install requests
+          python crawler/collect_data.py
+      - name: Save
+        uses: actions/upload-artifact@v4
+        with:
+          name: church-database
+          path: "**/*.json"
