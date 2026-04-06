@@ -6,8 +6,10 @@ jobs:
     steps:
       - name: Fetch
         run: |
-          curl -d 'data=[out:json];area["name"="Russia"]->.a;(node["amenity"="place_of_worship"](area.a););out;' https://overpass-api.de > base.json
+          curl -X POST \
+            --data-urlencode 'data=[out:json][timeout:2500][maxsize:1073741824];area["name"="Россия"]->.a;(node["amenity"="place_of_worship"](area.a);way["amenity"="place_of_worship"](area.a);relation["amenity"="place_of_worship"](area.a););out center;' \
+            https://overpass-api.de > base.json
       - uses: actions/upload-artifact@v4
         with:
-          name: my-base
+          name: churches-russia-json
           path: base.json
